@@ -22,62 +22,22 @@ function setup() {
   
   createCanvas(windowWidth, windowHeight);
 
-  colorMode(HSB, 100);
   agents = [];
-  regenerateAgents(gNumAgents);
-
-  setInterval(x => regenerateAgents(gNumAgents), 5000);
+  
 }
 
-function snapPos(p) {
+function createAgent(p= randomPos()) {
   return {
-    x: snap(p.x),
-    y: snap(p.y)
-  }
-}
-
-function createAgent(frac) {
-  let p = randomPos();
-  p.y = random(0.1, 0.9)*height;
-  p.x = width * map(1-frac, 0, 1, 0.1, 0.9);
-  return {
-    pos: snapPos(p),
-    size: frac,
-    color: rndRainbowColor({
-      sat: 70,
-      minHue: 0,
-      maxHue: 100
-    }),
-    historyPos: frac,
+    pos: p,
+    size: 1,
+    growSpeed: 1.5,
+    color: color(255,0,0),
+    age: 0,
     phase: random(10)
   }
 }
 
-function snap(v) {
-  return round(v / 100) * 100;
-}
 
-function regenerateAgents(n) {
-  agents = [];
-  repeat(n, i => agents.push(createAgent(i/n)));
-}
-
-function rndRainbowColor(opts) {
-  let {
-    sat,
-    minHue,
-    maxHue
-  } = opts;
-  if (!minHue) {
-    minHue = 0;
-  }
-  if (!maxHue) {
-    maxHue = 100;
-  }
-
-  colorMode(HSB, 100);
-  return color(random(minHue, maxHue), sat, 100);
-}
 
 function randomPos() {
   return {
@@ -94,23 +54,19 @@ function repeat(n, fn) {
 
 function drawAgent(agent) {
   let p = agent.pos;
-  fill(agent.color);
   push();
-  noStroke();
-  let v = agent.size * 400*volHistory.getAtFraction(agent.historyPos);
-  circle(p.x, p.y, v);
+  strokeWeight(0.5);
+  let alpha = map(Math.max(100 - agent.age), 0, 200, 0, 100);
+  stroke(color(255, 255, 255, alpha))
+  noFill();
+  
+  circle(p.x, p.y, agent.size);
   pop()
 }
-function drawAgentOutline(agent) {
-  let p = agent.pos;
-  fill('white');
-  push();
-  noStroke();
-  let v = agent.size * 500 * volHistory.getAtFraction(agent.historyPos)
-  circle(p.x, p.y, v);
-  pop()
+function updateAgent(agent){
+  agent.size += agent.growSpeed;
+  agent.age += 1;
 }
-
 class Buffer {
   constructor(size){
     this.buffer = [];
@@ -138,6 +94,9 @@ class Buffer {
     return this.buffer.reduce((accum, current) => accum + current) / this.size;
   }
 }
+function createRipple(agents){
+  agents.push(createAgent({ x: mouseX, y: mouseY }));
+}
 
 function draw() {
   background(0);
@@ -147,7 +106,10 @@ function draw() {
   let avg = smoothingBuffer.average();
 
   volHistory.add(avg);
-  
-  agents.forEach(drawAgentOutline);
+  textSize(32);
+  if (avg > 0.3){
+    createRipple(agents);
+  } 
+  agents.forEach(updateAgent);
   agents.forEach(drawAgent);
 }
