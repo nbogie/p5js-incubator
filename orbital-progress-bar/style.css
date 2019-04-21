@@ -1,9 +1,10 @@
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
 }
 body {
-  background-image: url("gabriele-diwald-201135-unsplash.jpg")
+  background-image: url("imgs/gabriele-diwald-201135-unsplash.jpg");
 }
 canvas {
   position: absolute;

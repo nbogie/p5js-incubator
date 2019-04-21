@@ -22,9 +22,6 @@ function randomPos() {
 function draw() {
   clear();
 
-  //add a dynamic background just to show the main trail is transparent
-  //drawNoisyBackground();
-
   push();
   translate(width / 2, height / 2);
 
@@ -51,13 +48,4 @@ function drawTrail(orbitRadius, thickness, fractionTimeElapsed) {
   stroke(100, 70);
   strokeCap(SQUARE);
   arc(0, 0, orbitRadius, orbitRadius, 0, TWO_PI * fractionTimeElapsed);
-}
-
-function drawNoisyBackground() {
-  strokeWeight(0.5);
-  stroke(random([255, 0]), random(20, 60));
-  for (let i = 0; i < 4; i++) {
-    let p = randomPos();
-    line(p.x, 0, p.x, height);
-  }
 }
