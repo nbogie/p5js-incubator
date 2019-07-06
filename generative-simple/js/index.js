@@ -1,6 +1,8 @@
 "use strict";
 let shouldDrawPalettePreview = false;
 
+const THING_RADIUS = 60;
+
 const FaveColors = {
   paletteStrs: [
     "#F8B195,#F67280,#C06C84,#6C5B7B,#355C7D,#F8B195,#F67280,#C06C84", //1001 stories http://www.colourlovers.com/palette/1811244/1001_Stories
@@ -73,7 +75,7 @@ function drawSquare() {
   pop();
 }
 
-function drawPetals(petalFn) {
+function drawPetals(petalFn, extentScale) {
   push();
   const sz = random(10, 40);
   fill(random([randomColor(), createEmptyColor()]));
@@ -81,28 +83,28 @@ function drawPetals(petalFn) {
   strokeWeight(2);
   angleMode(RADIANS);
   const numPetals = random([6, 8]);
-  for (let i = 0; i < numPetals; i++) {
+  repeat(numPetals, ix => {
     push();
-    rotate((i * TWO_PI) / numPetals);
-    translate(0, 50);
+    rotate((ix * TWO_PI) / numPetals);
+    translate(0, THING_RADIUS - (extentScale * sz) / 2);
     petalFn(sz);
     pop();
-  }
+  });
   pop();
 }
 
 function drawSquarePetals() {
-  drawPetals(sz => square(0, 0, sz));
+  drawPetals(sz => square(0, 0, sz), 1.21);
 }
 function drawCirclePetals() {
-  drawPetals(sz => circle(0, 0, sz / 2));
+  drawPetals(sz => circle(0, 0, sz / 2), 1);
 }
 
 function drawConcentricCircles() {
-  const maxRad = 50;
+  const maxRad = THING_RADIUS * 0.9;
+  noFill();
   strokeWeight(random([2, 10]));
   repeat(random([4, 6, 8]), (ix, lim) => {
-    noFill();
     stroke(randomColor());
     circle(0, 0, (ix * maxRad) / lim);
   });
@@ -112,38 +114,35 @@ function randomColorOrTransparent() {
 }
 function drawHexagon() {
   push();
-  //rotate(TWO_PI / 12);
-  const radius = 60;
+  const radius = THING_RADIUS;
   const sliceAngle = TWO_PI / 6;
   const startAngle = 0;
   strokeWeight(2);
   fill(randomColorOrTransparent());
   stroke(randomColor());
   beginShape();
-  for (let i = 0; i < 7; i++) {
-    const next = pointOnCircle(radius, startAngle + sliceAngle * i);
-    vertex(next.x, next.y);
-  }
-  endShape();
+  repeat(6, ix => {
+    const p = pointOnCircle(radius, startAngle + sliceAngle * ix);
+    vertex(p.x, p.y);
+  });
+  endShape(CLOSE);
   pop();
 }
 
 function drawRadialLines() {
-  push();
-  //rotate(TWO_PI / 12);
-  const endRadius = 60;
-  const startRadius = random([1, 2, 3, 4, 5]) * 10;
-  const startAngle = 0;
-  strokeWeight(2);
-  stroke(randomColor());
   const numLines = random([6, 4, 8, 12]);
   const sliceAngle = TWO_PI / numLines;
+  const endRadius = THING_RADIUS;
+  const startRadius = random([1, 2, 3, 4, 5]) * 10;
 
-  for (let i = 0; i < numLines; i++) {
-    const inner = pointOnCircle(startRadius, startAngle + sliceAngle * i);
-    const outer = pointOnCircle(endRadius, startAngle + sliceAngle * i);
-    line(inner.x, inner.y, outer.x, outer.y);
-  }
+  noFill();
+  strokeWeight(2);
+  stroke(randomColor());
+  push();
+  repeat(numLines, ix => {
+    rotate(sliceAngle);
+    line(startRadius, 0, endRadius, 0);
+  });
   pop();
 }
 
@@ -190,7 +189,16 @@ function atLeastOneOf(fns) {
   }
 }
 
+function drawGuideLines() {
+  stroke("gray");
+  strokeWeight(1);
+  noFill();
+  circle(0, 0, THING_RADIUS);
+}
+
 function drawThing() {
+  //drawGuideLines();
+
   atLeastOneOf([
     //    x => repeat(random(1, 2), drawSquare),
     random([drawSquarePetals, drawCirclePetals]),
