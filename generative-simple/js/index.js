@@ -52,34 +52,52 @@ function randomPos() {
   return { x: random(width), y: random(height) };
 }
 
+function pointOnCircle(radius, angleRads) {
+  return {
+    x: radius * cos(angleRads),
+    y: radius * sin(angleRads)
+  };
+}
+
+function createEmptyColor() {
+  return color(0, 1);
+}
+
 function drawSquare() {
   push();
-  translate(0, 0);
   rotate(random([0, PI / 4]));
-  fill(random([randomColor(), color(0, 1)]));
+  fill(randomColorOrTransparent());
   stroke(randomColor());
   strokeWeight(10);
   square(0, 0, random(50, 100));
   pop();
 }
 
-function drawSquares() {
+function drawPetals(petalFn) {
   push();
   const sz = random(10, 40);
-  fill(random([randomColor(), color(0, 1)]));
+  fill(random([randomColor(), createEmptyColor()]));
   stroke(randomColor());
   strokeWeight(2);
   angleMode(RADIANS);
-  const numSquares = random([6, 8]);
-  for (let i = 0; i < numSquares; i++) {
+  const numPetals = random([6, 8]);
+  for (let i = 0; i < numPetals; i++) {
     push();
-    rotate((i * TWO_PI) / numSquares);
+    rotate((i * TWO_PI) / numPetals);
     translate(0, 50);
-    square(0, 0, sz);
+    petalFn(sz);
     pop();
   }
   pop();
 }
+
+function drawSquarePetals() {
+  drawPetals(sz => square(0, 0, sz));
+}
+function drawCirclePetals() {
+  drawPetals(sz => circle(0, 0, sz / 2));
+}
+
 function drawConcentricCircles() {
   const maxRad = 50;
   strokeWeight(random([2, 10]));
@@ -89,10 +107,55 @@ function drawConcentricCircles() {
     circle(0, 0, (ix * maxRad) / lim);
   });
 }
+function randomColorOrTransparent() {
+  return random([randomColor(), createEmptyColor()]);
+}
+function drawHexagon() {
+  push();
+  //rotate(TWO_PI / 12);
+  const radius = 60;
+  const sliceAngle = TWO_PI / 6;
+  const startAngle = 0;
+  strokeWeight(2);
+  fill(randomColorOrTransparent());
+  stroke(randomColor());
+  beginShape();
+  for (let i = 0; i < 7; i++) {
+    const next = pointOnCircle(radius, startAngle + sliceAngle * i);
+    vertex(next.x, next.y);
+  }
+  endShape();
+  pop();
+}
+
+function drawRadialLines() {
+  push();
+  //rotate(TWO_PI / 12);
+  const endRadius = 60;
+  const startRadius = random([1, 2, 3, 4, 5]) * 10;
+  const startAngle = 0;
+  strokeWeight(2);
+  stroke(randomColor());
+  const numLines = random([6, 4, 8, 12]);
+  const sliceAngle = TWO_PI / numLines;
+
+  for (let i = 0; i < numLines; i++) {
+    const inner = pointOnCircle(startRadius, startAngle + sliceAngle * i);
+    const outer = pointOnCircle(endRadius, startAngle + sliceAngle * i);
+    line(inner.x, inner.y, outer.x, outer.y);
+  }
+  pop();
+}
+
 function draw() {
+  background("white");
   const numRows = 4;
   const numCols = 6;
+  drawGridOfThings(numRows, numCols, drawThing);
+  //  drawGridOfThings(numRows, numCols, drawHexagon);
+}
 
+function drawGridOfThings(numRows, numCols, drawThingFn) {
   const ySpacing = height / numRows;
   const xSpacing = width / numCols;
   const yStart = 80;
@@ -104,7 +167,7 @@ function draw() {
       const x = xStart + col * xSpacing;
       push();
       translate(x, y);
-      drawThing();
+      drawThingFn();
       pop();
     }
   }
@@ -115,10 +178,11 @@ function maybe(fn) {
 }
 
 function atLeastOneOf(fns) {
+  const shuffledFns = _.shuffle(fns);
   if (fns) {
     const maxChoicePacked = Math.pow(2, fns.length);
     let choicesPacked = int(random(1, maxChoicePacked));
-    fns.forEach(f => {
+    shuffledFns.forEach(f => {
       const include = choicesPacked & 1;
       include && f();
       choicesPacked = choicesPacked >> 1;
@@ -128,8 +192,10 @@ function atLeastOneOf(fns) {
 
 function drawThing() {
   atLeastOneOf([
-    x => repeat(random(1, 2), drawSquare),
-    drawSquares,
+    //    x => repeat(random(1, 2), drawSquare),
+    random([drawSquarePetals, drawCirclePetals]),
+    drawHexagon,
+    drawRadialLines,
     drawConcentricCircles
   ]);
 }
