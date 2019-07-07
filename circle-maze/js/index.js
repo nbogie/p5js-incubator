@@ -2,8 +2,11 @@
 const seedHistory = [];
 let showDebug = false;
 let shouldDrawPalettePreview = false;
+let strokeOn = true;
 let gSeed = 0;
 let THING_RADIUS = 50;
+let gColor;
+let gStrokeColor;
 
 const FaveColors = {
   paletteStrs: [
@@ -60,6 +63,10 @@ function keyPressed() {
   switch (key) {
     case "d":
       toggleShowDebug();
+      break;
+    case "s":
+      toggleStroke();
+      redraw();
       break;
     case " ":
       newRandomSeed();
@@ -148,6 +155,9 @@ function draw() {
   background("whitesmoke");
   const numRows = height / (6 * THING_RADIUS + 2);
   const numCols = width / (6 * THING_RADIUS + 2);
+  strokeOn = random([true, false]);
+  gColor = randomColor();
+  gStrokeColor = random([gColor, randomColor()]);
   drawGridOfThings(numRows * 2, numCols * 2, drawThing);
   if (showDebug) {
     textSize(24);
@@ -184,11 +194,13 @@ function drawEraserSlicesTo(rad) {
   const angle = (random([1, 2, 3, 4]) * PI) / 2;
   arc(0, 0, 2 * rad, 2 * rad, startAngle, startAngle + angle);
 }
+
 function drawCircleMaze() {
-  const c = randomColor();
   repeat(6, (ix, lim) => {
     const r = map(lim - ix, 0, lim, 10, THING_RADIUS);
-    fill(c);
+    strokeOn ? strokeWeight(1) : noStroke();
+    stroke(gStrokeColor);
+    fill(gColor);
     circle(0, 0, r);
     drawEraserSlicesTo(r);
   });
@@ -199,4 +211,7 @@ function drawThing() {
 
 function toggleShowDebug() {
   showDebug = !showDebug;
+}
+function toggleStroke() {
+  strokeOn = !strokeOn;
 }
