@@ -4,6 +4,7 @@ let showDebug = false;
 let shouldDrawPalettePreview = false;
 let gSeed = 0;
 let THING_RADIUS = 50;
+let colorBlack = "#202020";
 
 const FaveColors = {
   paletteStrs: [
@@ -156,7 +157,7 @@ function drawPetals(petalFn, extentScale) {
 }
 
 function drawSquarePetals() {
-  drawPetals(sz => square(0, 0, sz), 1.21);
+  drawPetals(sz => square(0, 0, sz, sz / 8, sz / 8), 1.21);
 }
 function drawTrianglePetals() {
   const rotationAmt = random([PI, 0]);
@@ -229,7 +230,7 @@ function drawRadialLines() {
 }
 
 function mouseDragged() {
-  THING_RADIUS = map(mouseX, 0, width, 10, 60);
+  THING_RADIUS = map(mouseX, 0, width, 10, width / 12);
   redraw();
 }
 
@@ -297,11 +298,43 @@ function drawThing() {
     //    x => repeat(random(1, 2), drawSquare),
     random([drawSquarePetals, drawCirclePetals, drawTrianglePetals]),
     drawOuterHexagon,
+
     random([drawSteppedHexagons, drawConcentricCircles]),
     drawRadialLines
   ]);
 }
+function drawNewThing() {
+  // drawGuideLines();
+  drawBlockTattoo();
+}
+function makeLineData() {
+  const data = [];
+  for (let i = 0; i < 5; i++) {
+    data.push(random([0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2]));
+  }
+  return data;
+}
 
+function drawBlockTattoo() {
+  fill(colorBlack);
+  const sz = THING_RADIUS;
+  translate(0, -sz);
+  noStroke();
+  repeat(6, (ix, lim) => {
+    const xs = _.sample([-2, -1, 0, 1, 2], 2);
+    const lineData = makeLineData();
+    lineData.forEach((mark, jx) => {
+      push();
+      translate((-2 + jx) * sz * 0.4, 0);
+      if (mark) {
+        mark === 1 ? rect(0, 0, sz * 0.4, sz * 0.15) : circle(0, 0, sz * 0.09);
+      }
+      pop();
+    });
+    translate(0, sz / 3);
+  });
+}
+THING_RADIUS;
 function toggleShowDebug() {
   showDebug = !showDebug;
 }
