@@ -110,9 +110,14 @@ function createVehicle() {
     steer: createVector(0, 0),
     canShoot: false,
     lastShot: -99999,
-    shotDelay: 100
+    shotDelay: 100,
+    trail: createTrail()
   };
 }
+function createTrail() {
+  return { particles: [] };
+}
+
 const resTypes = [
   { label: "fuel", hue: 55 },
   { label: "laser", hue: 30 },
@@ -149,6 +154,8 @@ function createParticleAt(pos) {
     pos: pos.copy(),
     vel: p5.Vector.random2D(),
     hue: random(10),
+    radius: random(0.5, 3),
+    color: randomColor(),
     life: 1
   };
 }
@@ -249,9 +256,9 @@ function posToString(p) {
   return `${Math.round(p.x)}, ${Math.round(p.y)}`;
 }
 function drawVehicle(p) {
+  drawTrail(p.trail);
   push();
   translateForScreenCoords(p.pos);
-  text(posToString(p.pos), 30, 30);
   colorMode(HSB, 100);
 
   fill(p.canShoot ? color(p.hue, 40, 100) : "gray");
@@ -274,6 +281,18 @@ function drawVehicle(p) {
   pop();
 }
 
+function drawTrail(trail) {
+  trail.particles.forEach(p => {
+    push();
+    translateForScreenCoords(p.pos);
+
+    noStroke();
+    fill(p.color);
+
+    square(0, 0, p.radius * 2);
+    pop();
+  });
+}
 function drawVec(vec, len, minMag, maxMag, c, lineWidth = 1) {
   push();
   rotate(vec.heading());
@@ -405,11 +424,18 @@ function updateVehicle(p) {
 
   updateShooting(p);
 
+  p.trail.particles.forEach(updateParticle);
+
   //reset accel for next time
-  p.accel.mult(0);
 
   p.life -= random(0.001, 0.01);
-  addParticle(createParticleAt(p.pos));
+  const particle = createParticleAt(p.pos);
+  particle.vel = p.accel
+    .copy()
+    .mult(20)
+    .rotate(PI + random(-0.3, 0.3));
+  addParticle(particle, p.trail.particles);
+  p.accel.mult(0);
 }
 
 function acquireTarget(vehicle) {
@@ -422,7 +448,7 @@ function acquireTarget(vehicle) {
 function addShot(opts) {
   colorMode(HSB, 100);
   const shotSpread = PI / 32;
-  const sz = Math.pow(random(2, 7), 2);
+  const sz = Math.pow(random([2, 3, 4, 5, 6, 7]), 2);
   const vel = opts.vel
     .copy()
     .normalize()
@@ -443,9 +469,8 @@ function drawShot(s) {
     push();
     translateForScreenCoords(s.pos);
     fill(s.color);
-    noStroke();
     rotate(s.rotation);
-    square(0, 0, s.radius);
+    rect(0, 0, s.radius, s.radius / 2);
     pop();
   }
 }
@@ -494,9 +519,9 @@ function updateShooting(p) {
   }
 }
 
-function addParticle(p) {
-  particles.unshift(p);
-  particles.splice(100);
+function addParticle(p, ps) {
+  ps.unshift(p);
+  ps.splice(100);
 }
 function onScreen(pos, radius) {
   return (
@@ -565,9 +590,9 @@ function drawGridLines() {
       );
       push();
       translateForScreenCoords(pos);
-      strokeWeight(0.5);
+      strokeWeight(0.1);
       colorMode(RGB, 255);
-      stroke(color(100, 255, 0, 120));
+      stroke(color(255, 255, 255, 120));
       line(0, -width / 2, 0, width / 2);
       line(-width / 2, 0, width / 2, 0);
       pop();
@@ -594,8 +619,6 @@ function updateCamera(cameraPos) {
       screenShakeAmount -= 0.4;
     }
   }
-  textSize(14);
-  text(posToString(mouseWorldPos()), 40, 200);
 }
 function shakeCamera(amt) {
   cameraPos.add(p5.Vector.random2D().mult(amt));
