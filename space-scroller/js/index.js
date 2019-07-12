@@ -175,7 +175,7 @@ function createStarfield() {
   repeat(1000 * numberOfWorldPages(), ix =>
     stars.push({
       pos: randomWorldPos(),
-      sz: random(0.5, 3),
+      radius: random(0.5, random(0.5, 3)),
       strength: random(100)
     })
   );
@@ -344,6 +344,7 @@ function updateAsteroid(p) {
     }
     p.rotation += p.rotationSpeed;
   }
+  p.tookDamage = false;
 }
 function isColliding(a, s) {
   return dist(a.pos.x, a.pos.y, s.pos.x, s.pos.y) < a.radius + s.radius;
@@ -383,6 +384,7 @@ function updateShot(p) {
       .forEach(a => {
         if (isColliding(a, p)) {
           a.hp -= p.damage;
+          a.tookDamage = true;
           p.live = false;
           if (a.hp <= 0) {
             a.live = false;
@@ -448,17 +450,19 @@ function acquireTarget(vehicle) {
 function addShot(opts) {
   colorMode(HSB, 100);
   const shotSpread = PI / 32;
-  const sz = Math.pow(random([2, 3, 4, 5, 6, 7]), 2);
+  const sz = random([4, 5, 6, 7]);
   const vel = opts.vel
     .copy()
     .normalize()
-    .mult(sz);
+    .mult(25)
+    .rotate(random(-shotSpread, shotSpread));
+
   gShots.unshift({
     live: true,
     pos: opts.pos.copy().add(vel),
-    rotation: opts.rotation,
-    vel: opts.vel.copy().rotate(random(-shotSpread, shotSpread)),
-    radius: sz,
+    rotation: vel.heading(),
+    vel: vel,
+    radius: Math.pow(sz, 2),
     damage: sz,
     color: color(random(50, 70), 100, 100, 100)
   });
@@ -469,6 +473,7 @@ function drawShot(s) {
     push();
     translateForScreenCoords(s.pos);
     fill(s.color);
+    noStroke();
     rotate(s.rotation);
     rect(0, 0, s.radius, s.radius / 2);
     pop();
@@ -482,7 +487,8 @@ function drawAsteroid(a) {
     colorMode(HSB, 100);
     push();
     rotate(a.rotation);
-    fill(a.resType.color);
+
+    fill(a.tookDamage ? "white" : a.resType.color);
     noStroke();
     square(0, 0, a.radius * 2, 6, 6);
     pop();
@@ -504,8 +510,7 @@ function shootIfTime(p) {
         .copy()
         .normalize()
         .mult(40)
-        .add(p.vel),
-      rotation: p.facing
+        .add(p.vel)
     });
     p.lastShot = ms;
   }
@@ -535,13 +540,17 @@ function drawStarfield() {
   stars
     .filter(s => onScreen(s.pos, 5))
     .forEach(s => {
+      const r = s.radius * 2;
       push();
-      translateForScreenCoords(s.pos);
-
       colorMode(HSB, 100);
-      fill(color(0, 0, 100, s.strength));
+      const colr = color(0, 0, 100, s.strength);
+      translateForScreenCoords(s.pos);
+      fill(colr);
       noStroke();
-      circle(0, 0, s.sz);
+      circle(0, 0, s.radius);
+      stroke(colr);
+      line(-r, 0, r, 0);
+      line(0, -r, 0, r);
       pop();
     });
 }
@@ -556,8 +565,8 @@ function draw() {
   asteroids.forEach(drawAsteroid);
   particles.forEach(drawParticle);
   vehicles.forEach(drawVehicle);
-  gShots.forEach(updateShot);
   asteroids.forEach(updateAsteroid);
+  gShots.forEach(updateShot);
   particles.forEach(updateParticle);
   vehicles.forEach(updateVehicle);
   fill("white");
