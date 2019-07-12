@@ -135,11 +135,11 @@ function createAsteroidAt(opts) {
   return {
     live: true,
     pos: opts.pos.copy(),
-    vel: p5.Vector.random2D(),
+    vel: p5.Vector.random2D().mult(random(1, 5)),
     resType: random(resTypes),
     sizeCategory: sz,
     radius: sz * 10,
-    hp: sz * 5,
+    hp: sz * 20,
     rotation: random(TWO_PI),
     rotationSpeed: random(-0.1, 0.1)
   };
@@ -483,20 +483,20 @@ function drawAsteroid(a) {
   if (a.live) {
     push();
     translateForScreenCoords(a.pos);
-
     colorMode(HSB, 100);
+
     push();
     rotate(a.rotation);
-
     fill(a.tookDamage ? "white" : a.resType.color);
     noStroke();
     square(0, 0, a.radius * 2, 6, 6);
     pop();
+
     textSize(12);
     stroke("black");
-
     strokeWeight(2);
     text(a.hp, 20, 20);
+
     pop();
   }
 }
