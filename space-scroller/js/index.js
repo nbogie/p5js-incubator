@@ -1,7 +1,11 @@
 "use strict";
+p5.disableFriendlyErrors = true; // disables FES
+
+const shouldDrawTrails = true;
+const shouldDrawStars = false;
+
 const stars = [];
 const vehicles = [];
-const particles = [];
 const asteroids = [];
 const gTargets = [];
 const gNumTargets = 6;
@@ -108,6 +112,7 @@ function createVehicle() {
     color: randomColor(),
     traction: 0.3,
     steer: createVector(0, 0),
+    rammingDamage: 10,
     canShoot: false,
     lastShot: -99999,
     shotDelay: 100,
@@ -160,11 +165,6 @@ function createParticleAt(pos) {
   };
 }
 
-function createParticles(n) {
-  repeat(n, ix => {
-    particles.push(createParticle());
-  });
-}
 function createVehicles(n) {
   repeat(n, ix => vehicles.push(createVehicle()));
 }
@@ -192,7 +192,7 @@ function numberOfWorldPages() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   cameraPos = createVector(0, 0);
-  frameRate(50);
+  frameRate(60);
   angleMode(RADIANS);
   randomizeBigPalette();
   setPaletteForResources();
@@ -256,7 +256,9 @@ function posToString(p) {
   return `${Math.round(p.x)}, ${Math.round(p.y)}`;
 }
 function drawVehicle(p) {
-  drawTrail(p.trail);
+  if (shouldDrawTrails) {
+    drawTrail(p.trail);
+  }
   push();
   translateForScreenCoords(p.pos);
   colorMode(HSB, 100);
@@ -396,48 +398,48 @@ function updateShot(p) {
   }
 }
 
-function updateVehicle(p) {
-  p.pos.add(p.vel);
-  const vel = createVector(p.vel.x, p.vel.y);
+function updateVehicle(v) {
+  v.pos.add(v.vel);
+  const vel = createVector(v.vel.x, v.vel.y);
 
-  const currPos = createVector(p.pos.x, p.pos.y);
+  const currPos = createVector(v.pos.x, v.pos.y);
 
-  if (p.target && p.target.live) {
-    const targetPos = createVector(p.target.pos.x, p.target.pos.y);
+  if (v.target && v.target.live) {
+    const targetPos = createVector(v.target.pos.x, v.target.pos.y);
     const desired = p5.Vector.sub(targetPos, currPos);
     desired.normalize();
-    desired.mult(p.maxSpeed);
-    p.desiredVector = desired.copy().normalize();
-    p.facing = p.desiredVector
+    desired.mult(v.maxSpeed);
+    v.desiredVector = desired.copy().normalize();
+    v.facing = v.desiredVector
       .copy()
       .normalize()
       .heading();
 
     //steering = desired minus velocity
     const steer = p5.Vector.sub(desired, vel);
-    steer.limit(p.maxSteeringForce);
-    p.steer = steer.copy();
-    p.accel.add(steer);
-    p.fuel -= p.accel.mag();
+    steer.limit(v.maxSteeringForce);
+    v.steer = steer.copy();
+    v.accel.add(steer);
+    v.fuel -= v.accel.mag();
   } else {
-    p.target = acquireTarget(p);
+    v.target = acquireTarget(v);
   }
-  p.vel.add(p.accel);
+  v.vel.add(v.accel);
 
-  updateShooting(p);
+  updateShooting(v);
 
-  p.trail.particles.forEach(updateParticle);
+  v.trail.particles.forEach(updateParticle);
 
   //reset accel for next time
 
-  p.life -= random(0.001, 0.01);
-  const particle = createParticleAt(p.pos);
-  particle.vel = p.accel
+  v.life -= random(0.001, 0.01);
+  const particle = createParticleAt(v.pos);
+  particle.vel = v.accel
     .copy()
     .mult(20)
     .rotate(PI + random(-0.3, 0.3));
-  addParticle(particle, p.trail.particles);
-  p.accel.mult(0);
+  addParticle(particle, v.trail.particles);
+  v.accel.mult(0);
 }
 
 function acquireTarget(vehicle) {
@@ -558,22 +560,25 @@ function drawStarfield() {
 function draw() {
   background(0);
   push();
-  drawStarfield();
+  if (shouldDrawStars) {
+    drawStarfield();
+  }
 
   drawGridLines();
-  gShots.forEach(drawShot);
+
+  const filteredShots = gShots.filter(
+    s => s.live && distFromCamera(s.pos) < width
+  );
+
+  filteredShots.forEach(drawShot);
   asteroids.forEach(drawAsteroid);
-  particles.forEach(drawParticle);
   vehicles.forEach(drawVehicle);
-  asteroids.forEach(updateAsteroid);
-  gShots.forEach(updateShot);
-  particles.forEach(updateParticle);
-  vehicles.forEach(updateVehicle);
-  fill("white");
+
   vehicles
     .filter(v => v.target && v.target.live)
     .forEach(v => drawTarget(v.target));
   pop();
+
   fill("white");
   textSize(12);
   text(
@@ -585,6 +590,11 @@ function draw() {
     600
   );
 
+  text(filteredShots.length + "", 50, 550);
+  text(Math.round(frameRate()) + " fps", 50, 575);
+  asteroids.forEach(updateAsteroid);
+  gShots.forEach(updateShot);
+  vehicles.forEach(updateVehicle);
   updateCamera(cameraPos);
 }
 
