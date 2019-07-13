@@ -3,11 +3,16 @@ p5.disableFriendlyErrors = true; // disables FES
 
 const shouldDrawTrails = true;
 const shouldDrawStars = false;
+let trackedVehicle;
+
+let shootOsc;
+let shootEnv;
 
 const stars = [];
 const vehicles = [];
 const asteroids = [];
 const gTargets = [];
+const orbs = [];
 const gNumTargets = 6;
 const gNumVehicles = 6;
 const gAsteroids = [];
@@ -99,9 +104,12 @@ function keyPressed() {
 }
 function createVehicle() {
   return {
+    live: true,
     pos: randomWorldPos(),
     vel: createVector(0, 0),
     accel: createVector(0, 0),
+    radius: 10,
+    hp: 100,
     target: undefined,
     fuel: 100,
     desiredVector: createVector(0, 0),
@@ -112,7 +120,7 @@ function createVehicle() {
     color: randomColor(),
     traction: 0.3,
     steer: createVector(0, 0),
-    rammingDamage: 10,
+    rammingDamage: 3,
     canShoot: false,
     lastShot: -99999,
     shotDelay: 100,
@@ -144,6 +152,7 @@ function createAsteroidAt(opts) {
     resType: random(resTypes),
     sizeCategory: sz,
     radius: sz * 10,
+    damage: sz,
     hp: sz * 20,
     rotation: random(TWO_PI),
     rotationSpeed: random(-0.1, 0.1)
@@ -189,8 +198,39 @@ function setPaletteForResources() {
 function numberOfWorldPages() {
   return Math.pow(worldWidth / width, 2);
 }
+
+function setupSound() {
+  var attackLevel = 1.0;
+  var releaseLevel = 0;
+
+  var attackTime = 0.001;
+  var decayTime = 0.01;
+  var susPercent = 0.2;
+  var releaseTime = 0.05;
+
+  shootEnv = new p5.Envelope();
+  shootEnv.setADSR(attackTime, decayTime, susPercent, releaseTime);
+  shootEnv.setRange(attackLevel, releaseLevel);
+
+  shootOsc = new p5.Oscillator("triangle");
+  shootOsc.amp(shootEnv);
+  shootOsc.start();
+  shootOsc.freq(880);
+}
+function drawOrb(o) {
+  if (o.live) {
+    push();
+    translateForScreenCoords(o.pos);
+    noStroke();
+    fill("white");
+    circle(0, 0, o.radius);
+    pop();
+  }
+}
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  //setupSound();
   cameraPos = createVector(0, 0);
   frameRate(60);
   angleMode(RADIANS);
@@ -263,9 +303,10 @@ function drawVehicle(p) {
   translateForScreenCoords(p.pos);
   colorMode(HSB, 100);
 
-  fill(p.canShoot ? color(p.hue, 40, 100) : "gray");
+  fill(p.tookDamage ? "white" : p.canShoot ? color(p.hue, 40, 100) : "gray");
   noStroke();
   const sz = 10;
+
   push();
   rotate(p.facing);
   beginShape();
@@ -280,7 +321,34 @@ function drawVehicle(p) {
   drawVec(p.vel, 50, 0, p.maxSpeed, color(30, 0, 100, 30), 4);
   drawVec(p.steer, 30, 0, p.maxSteeringForce, color(0, 100, 100, 25), 1);
 
+  push();
+  if (p.live) {
+    translate(0, -30);
+    fill("#101010");
+    rectMode(CENTER);
+    rect(0, 0, 30, 6);
+
+    fill(getColorForShipHP(p.hp));
+    rectMode(CORNER);
+    rect(-15, -3, map(p.hp, 0, 100, 0, 30), 6);
+    rectMode(CENTER);
+  } else {
+    translate(-15, -30);
+    text("DEAD", 0, 0);
+  }
   pop();
+
+  pop();
+}
+function getColorForShipHP(hp) {
+  if (hp > 66) {
+    return "green";
+  }
+  if (hp > 33) {
+    return "yellow";
+  }
+
+  return "red";
 }
 
 function drawTrail(trail) {
@@ -345,6 +413,24 @@ function updateAsteroid(p) {
       p.pos.y -= worldHeight / 2;
     }
     p.rotation += p.rotationSpeed;
+
+    vehicles
+      .filter(v => true || v.live)
+      .forEach(v => {
+        if (isColliding(p, v)) {
+          p.hp -= v.rammingDamage;
+          p.tookDamage = true;
+          v.hp -= p.damage;
+          if (v.hp <= 0) {
+            v.live = false;
+          }
+          v.tookDamage = true;
+          if (p.hp <= 0) {
+            p.live = false;
+            shatterAsteroid(p);
+          }
+        }
+      });
   }
   p.tookDamage = false;
 }
@@ -376,7 +462,23 @@ function screenShake(amt) {
     screenShakeAmount = maxScreenShakeAmount;
   }
 }
-
+function updateOrb(p) {
+  if (p.live) {
+    p.pos.add(p.vel);
+    if (Math.random() < 0.01) {
+      p.exploding = true;
+    }
+    if (p.exploding) {
+      p.radius *= 2;
+      p.life -= 0.03;
+      if (p.life <= 0) {
+        p.live = false;
+      }
+    } else {
+      p.radius = map(sin(frameCount / 3), -1, 1, 10, 30);
+    }
+  }
+}
 function updateShot(p) {
   if (p.live) {
     p.pos.x += p.vel.x;
@@ -400,10 +502,13 @@ function updateShot(p) {
 
 function updateVehicle(v) {
   v.pos.add(v.vel);
+
   const vel = createVector(v.vel.x, v.vel.y);
 
   const currPos = createVector(v.pos.x, v.pos.y);
-
+  if (!v.live) {
+    return;
+  }
   if (v.target && v.target.live) {
     const targetPos = createVector(v.target.pos.x, v.target.pos.y);
     const desired = p5.Vector.sub(targetPos, currPos);
@@ -440,6 +545,7 @@ function updateVehicle(v) {
     .rotate(PI + random(-0.3, 0.3));
   addParticle(particle, v.trail.particles);
   v.accel.mult(0);
+  v.tookDamage = false;
 }
 
 function acquireTarget(vehicle) {
@@ -448,7 +554,18 @@ function acquireTarget(vehicle) {
   );
   return random(closeAsteroids.length > 0 ? closeAsteroids : asteroids);
 }
-
+function addOrb(opts) {
+  const orb = {
+    pos: opts.pos.copy(),
+    vel: opts.vel.copy(),
+    live: true,
+    life: 1,
+    radius: 30,
+    exploding: false
+  };
+  orbs.unshift(orb);
+  orbs.splice(10);
+}
 function addShot(opts) {
   colorMode(HSB, 100);
   const shotSpread = PI / 32;
@@ -469,6 +586,7 @@ function addShot(opts) {
     color: color(random(50, 70), 100, 100, 100)
   });
   gShots.splice(100);
+  //playEnv();
 }
 function drawShot(s) {
   if (s.live) {
@@ -565,7 +683,7 @@ function draw() {
   }
 
   drawGridLines();
-
+  orbs.forEach(o => drawOrb(o));
   const filteredShots = gShots.filter(
     s => s.live && distFromCamera(s.pos) < width
   );
@@ -574,6 +692,8 @@ function draw() {
   asteroids.forEach(drawAsteroid);
   vehicles.forEach(drawVehicle);
 
+  trackedVehicle = vehicles.find(v => v.hp > 0);
+
   vehicles
     .filter(v => v.target && v.target.live)
     .forEach(v => drawTarget(v.target));
@@ -581,6 +701,12 @@ function draw() {
 
   fill("white");
   textSize(12);
+
+  text(filteredShots.length + "", 50, 550);
+  if (trackedVehicle) {
+    text("Health: " + trackedVehicle.hp, width - 100, 50);
+  }
+  text(Math.round(frameRate()) + " fps", 50, 575);
   text(
     JSON.stringify({
       x: Math.round(cameraPos.x),
@@ -590,12 +716,11 @@ function draw() {
     600
   );
 
-  text(filteredShots.length + "", 50, 550);
-  text(Math.round(frameRate()) + " fps", 50, 575);
-  asteroids.forEach(updateAsteroid);
   gShots.forEach(updateShot);
   vehicles.forEach(updateVehicle);
-  updateCamera(cameraPos);
+  asteroids.forEach(updateAsteroid);
+  orbs.forEach(updateOrb);
+  updateCamera(cameraPos, trackedVehicle);
 }
 
 function drawGridLines() {
@@ -618,7 +743,7 @@ function drawGridLines() {
     }
   }
 }
-function updateCamera(cameraPos) {
+function updateCamera(cameraPos, trackedVehicle) {
   if (keyIsDown(LEFT_ARROW)) {
     cameraPos.x += cameraMoveSpeed;
   }
@@ -631,8 +756,9 @@ function updateCamera(cameraPos) {
   if (keyIsDown(DOWN_ARROW)) {
     cameraPos.y -= cameraMoveSpeed;
   }
-  if (vehicles.length > 0) {
-    trackVehicleWithCamera(vehicles[0]);
+
+  if (trackedVehicle) {
+    trackVehicleWithCamera(trackedVehicle);
     if (screenShakeAmount > 0) {
       shakeCamera(screenShakeAmount);
       screenShakeAmount -= 0.4;
@@ -688,4 +814,14 @@ function atLeastTwoOf(fns) {
 
 function toggleShowDebug() {
   showDebug = !showDebug;
+}
+function playEnv() {
+  shootOsc.freq(random([440, 770, 990, 880]));
+
+  shootEnv.play();
+}
+function keyPressed() {
+  if (trackedVehicle) {
+    addOrb(trackedVehicle);
+  }
 }
