@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>p5js - moving background canvas</title>
+  <link rel="stylesheet" href="libs/bootstrap.min.css">
+
+  <link rel="stylesheet" href="style.css">
+
+  <script src='libs/p5.min.js'></script>
+  <script src='libs/p5.dom.min.js'></script>
+  <script src='libs/underscore-min.js'></script>
+  <script src="js/index.js"></script>
+
+</head>
+
+<body>
+
+  <div id="readme" class="Box-body readme blob instapaper_body js-code-block-container">
+    <article class="markdown-body entry-content p-3 p-md-6" itemprop="text"><h1><a id="user-content-challenge-tv-show-episode-list" class="anchor" aria-hidden="true" href="https://github.com/nbogie/cyf-react-challenges/blob/master/challenge-tv-show-info/README.md#challenge-tv-show-episode-list"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Challenge: TV Show Episode List</h1>
+<h2><a id="user-content-challenge-overview" class="anchor" aria-hidden="true" href="https://github.com/nbogie/cyf-react-challenges/blob/master/challenge-tv-show-info/README.md#challenge-overview"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Challenge Overview</h2>
+<p>You must make a React app which shows all of the episode summaries of a tv show such as "Game Of Thrones", in one long list.</p>
+<h3><a id="user-content-example-screenshot" class="anchor" aria-hidden="true" href="https://github.com/nbogie/cyf-react-challenges/blob/master/challenge-tv-show-info/README.md#example-screenshot"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example Screenshot</h3>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/nbogie/cyf-react-challenges/blob/master/challenge-tv-show-info/example-thrones-screenshot.png">
+  screenshot</a></p>
+<h2><a id="user-content-what-you-need-to-know-before-starting" class="anchor" aria-hidden="true" href="https://github.com/nbogie/cyf-react-challenges/blob/master/challenge-tv-show-info/README.md#what-you-need-to-know-before-starting"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What you need to know before starting:</h2>
+<p>This challenge is suitable if you have successfully completed the homework of CYF React Week 1.</p>
+<p>You <em>will</em> need to know...</p>
+<ul>
+<li>how to create a react app</li>
+<li>how to load a static json file</li>
+<li>how to create a component in react</li>
+<li>how to pass props</li>
+<li>how to populate components from an array</li>
+</ul>
+<p>You DON'T need to know about:</p>
+<ul>
+<li>state</li>
+<li>fetching JSON from an API</li>
+</ul>
+<h2><a id="user-content-task-download-and-save-a-json-file" class="anchor" aria-hidden="true" href="https://github.com/nbogie/cyf-react-challenges/blob/master/challenge-tv-show-info/README.md#task-download-and-save-a-json-file"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Task: Download and save a JSON file</h2>
+<p>Your app should read the information <em>locally</em> from a static JSON file.  Download one of the following JSON files and save it.</p>
+<ul>
+<li><a href="http://api.tvmaze.com/shows/169/episodes" rel="nofollow">Breaking Bad</a></li>
+<li><a href="http://api.tvmaze.com/shows/82/episodes" rel="nofollow">Game of Thrones</a></li>
+<li><a href="http://api.tvmaze.com/shows/123/episodes" rel="nofollow">Lost</a></li>
+<li><a href="http://api.tvmaze.com/shows/335/episodes" rel="nofollow">Sherlock</a></li>
+<li><a href="http://api.tvmaze.com/shows/491/episodes" rel="nofollow">Star Trek TNG</a></li>
+<li><a href="http://api.tvmaze.com/shows/3928/episodes" rel="nofollow">The Daily Show</a></li>
+<li><a href="http://api.tvmaze.com/shows/83/episodes" rel="nofollow">The Simpsons</a></li>
+<li><a href="http://api.tvmaze.com/shows/527/episodes" rel="nofollow">The Sopranos</a></li>
+<li><a href="http://api.tvmaze.com/shows/73/episodes" rel="nofollow">The Walking Dead</a></li>
+<li><a href="http://www.tvmaze.com/shows/179/the-wire" rel="nofollow">The Wire</a></li>
+<li><a href="http://api.tvmaze.com/shows/430/episodes" rel="nofollow">The X-Files</a></li>
+<li><a href="http://api.tvmaze.com/shows/22/episodes" rel="nofollow">True Blood</a></li>
+</ul>
+<p>Save it in your app in a new directory <code>src/data/</code>.  E.g. <code>src/data/sherlock.json</code></p>
+<h1><a id="user-content-try-to-figure-the-rest-out-by-yourself" class="anchor" aria-hidden="true" href="https://github.com/nbogie/cyf-react-challenges/blob/master/challenge-tv-show-info/README.md#try-to-figure-the-rest-out-by-yourself"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Try to figure the rest out by yourself</h1>
+<p>If you want a harder challenge, don't read the rest of this document but try to build the app by yourself.</p>
+<h1><a id="user-content-suggested-approach" class="anchor" aria-hidden="true" href="https://github.com/nbogie/cyf-react-challenges/blob/master/challenge-tv-show-info/README.md#suggested-approach"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Suggested approach</h1>
+<p>Here's one approach you might take to building this app.</p>
+<h2><a id="user-content-task-investigate-the-json" class="anchor" aria-hidden="true" href="https://github.com/nbogie/cyf-react-challenges/blob/master/challenge-tv-show-info/README.md#task-investigate-the-json"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Task: Investigate the JSON</h2>
+<p>Look at the JSON.
+Ask yourself the following questions and more - these will help you when you come to use the JSON in your app:</p>
+<ul>
+<li>
+<p>Does it contain an array or an object, at the top level?</p>
+<ul>
+<li>If you think it contains an object at top level, what are the properties of the object?</li>
+<li>If you think it contains an array at top level, how many elements are there in that array?</li>
+</ul>
+</li>
+<li>
+<p>What properties will you need from each episode?</p>
+<ul>
+<li>What are their names?</li>
+<li>Are they nested within other properties?</li>
+</ul>
+</li>
+</ul>
+<h2><a id="user-content-task-create-a-new-react-app" class="anchor" aria-hidden="true" href="https://github.com/nbogie/cyf-react-challenges/blob/master/challenge-tv-show-info/README.md#task-create-a-new-react-app"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Task: Create a new React app</h2>
+<p>Create a new empty React app for this challenge.</p>
+<p>The tool can take a while to run, so continue with the next task while it's running...</p>
+<h2><a id="user-content-task-design-your-layout-on-paper" class="anchor" aria-hidden="true" href="https://github.com/nbogie/cyf-react-challenges/blob/master/challenge-tv-show-info/README.md#task-design-your-layout-on-paper"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Task: Design your layout <em>on paper</em></h2>
+<p>Design your layout on paper.  Keep it very simple - this is a React challenge, not a CSS challenge.</p>
+<p>Use a layout that will be ok on a phone (but don't do responsive design).</p>
+<p>Keep this drawing around for reference later.</p>
+<h2><a id="user-content-task-convert-your-layout-to-jsx-html" class="anchor" aria-hidden="true" href="https://github.com/nbogie/cyf-react-challenges/blob/master/challenge-tv-show-info/README.md#task-convert-your-layout-to-jsx-html"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Task: Convert your layout to JSX (HTML)</h2>
+<p>Make a prototype which just shows detail from one or two example episodes.  <em>Don't</em> worry about the JSON yet.</p>
+<p>You can do this all within your <code>App.js</code>, or you can immediately build some React Component(s).</p>
+<h2><a id="user-content-task-read-in-the-json" class="anchor" aria-hidden="true" href="https://github.com/nbogie/cyf-react-challenges/blob/master/challenge-tv-show-info/README.md#task-read-in-the-json"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Task: Read in the JSON</h2>
+<p>Make your app load the JSON that you previously saved in a local file.  Extract the first episode and use it to populate an <code>Episode</code> component.</p>
+<h2><a id="user-content-task-make-the-whole-list-of-episodes" class="anchor" aria-hidden="true" href="https://github.com/nbogie/cyf-react-challenges/blob/master/challenge-tv-show-info/README.md#task-make-the-whole-list-of-episodes"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Task: Make the whole list of episodes</h2>
+<p>Loop over the JSON to make a whole list of <code>Episode</code> components.  If your app crashes at this point, <em>DO NOT</em> edit the JSON - instead, debug your code.</p>
+<h2><a id="user-content-advanced-challenge-make-an-episode-selector" class="anchor" aria-hidden="true" href="https://github.com/nbogie/cyf-react-challenges/blob/master/challenge-tv-show-info/README.md#advanced-challenge-make-an-episode-selector"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Advanced Challenge: make an episode selector</h2>
+<p>Modify your app to show only one episode, which your user can choose using a <code>select</code> input.</p>
+<p>Make the selector that lists the episode numbers (E1S1) and titles, and allows you to choose one.</p>
+<p>When you choose one from the selector, have the single shown episode update accordingly.</p>
+<h2><a id="user-content-advanced-challenge-host-your-app" class="anchor" aria-hidden="true" href="https://github.com/nbogie/cyf-react-challenges/blob/master/challenge-tv-show-info/README.md#advanced-challenge-host-your-app"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Advanced Challenge: Host your app</h2>
+<p>Host your app and prove it works by viewing it on your phone!</p>
+<p>You can use Heroku to host, or github pages, or codesandbox.io, or glitch.com</p>
+<h2><a id="user-content-advanced-challenge-download-the-json-live-from-the-api" class="anchor" aria-hidden="true" href="https://github.com/nbogie/cyf-react-challenges/blob/master/challenge-tv-show-info/README.md#advanced-challenge-download-the-json-live-from-the-api"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Advanced Challenge: download the json live from the API</h2>
+<p>We have not covered how to do this in class yet.</p>
+<p>Change your React app so that instead of using static data in a local file, it gets the data from the API just before it shows the page.</p>
+<p>Add the ability to change which <em>show</em> is being presented.  E.g. change from "Game of Thrones" to "Star Trek".</p>
+</article>
+  </div>
+
+    </div>
+
+  
+
+</body>
+
+</html>
