@@ -3,6 +3,9 @@ p5.disableFriendlyErrors = true; // disables FES
 
 const shouldDrawTrails = true;
 const shouldDrawStars = false;
+
+const shouldPlaySound = false;
+
 let trackedVehicle;
 
 let shootOsc;
@@ -19,6 +22,7 @@ const gAsteroids = [];
 const gShots = [];
 const worldWidth = 6000;
 const worldHeight = 5000;
+
 let cameraPos;
 let cameraMoveSpeed = 5;
 const maxScreenShakeAmount = 10;
@@ -151,7 +155,7 @@ function createAsteroidAt(opts) {
     vel: p5.Vector.random2D().mult(random(1, 5)),
     resType: random(resTypes),
     sizeCategory: sz,
-    radius: sz * 10,
+    radius: sz * 7,
     damage: sz,
     hp: sz * 20,
     rotation: random(TWO_PI),
@@ -200,6 +204,9 @@ function numberOfWorldPages() {
 }
 
 function setupSound() {
+  if (!shouldPlaySound) {
+    return;
+  }
   var attackLevel = 1.0;
   var releaseLevel = 0;
 
@@ -230,7 +237,7 @@ function drawOrb(o) {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  //setupSound();
+  setupSound();
   cameraPos = createVector(0, 0);
   frameRate(60);
   angleMode(RADIANS);
@@ -467,6 +474,7 @@ function updateOrb(p) {
     p.pos.add(p.vel);
     if (Math.random() < 0.01) {
       p.exploding = true;
+      screenShake(4);
     }
     if (p.exploding) {
       p.radius *= 2;
@@ -566,7 +574,7 @@ function addOrb(opts) {
   orbs.unshift(orb);
   orbs.splice(10);
 }
-function addShot(opts) {
+function createShot(opts) {
   colorMode(HSB, 100);
   const shotSpread = PI / 32;
   const sz = random([4, 5, 6, 7]);
@@ -576,7 +584,7 @@ function addShot(opts) {
     .mult(25)
     .rotate(random(-shotSpread, shotSpread));
 
-  gShots.unshift({
+  const shot = {
     live: true,
     pos: opts.pos.copy().add(vel),
     rotation: vel.heading(),
@@ -584,9 +592,16 @@ function addShot(opts) {
     radius: Math.pow(sz, 2),
     damage: sz,
     color: color(random(50, 70), 100, 100, 100)
-  });
+  };
+  return shot;
+}
+function addShot(opts) {
+  const shot = createShot(opts);
+  gShots.unshift(shot);
   gShots.splice(100);
-  //playEnv();
+  if (nearCamera(shot.pos)) {
+    playEnv();
+  }
 }
 function drawShot(s) {
   if (s.live) {
@@ -609,7 +624,7 @@ function drawAsteroid(a) {
     rotate(a.rotation);
     fill(a.tookDamage ? "white" : a.resType.color);
     noStroke();
-    square(0, 0, a.radius * 2, 6, 6);
+    square(0, 0, a.radius * 2.7, 6, 6);
     pop();
 
     textSize(12);
@@ -660,7 +675,7 @@ function drawStarfield() {
   stars
     .filter(s => onScreen(s.pos, 5))
     .forEach(s => {
-      const r = s.radius * 2;
+      const r = Math.random() > 0.9 ? s.radius * 2 : 0;
       push();
       colorMode(HSB, 100);
       const colr = color(0, 0, 100, s.strength);
@@ -702,16 +717,17 @@ function draw() {
   fill("white");
   textSize(12);
 
-  text(filteredShots.length + "", 50, 550);
   if (trackedVehicle) {
     text("Health: " + trackedVehicle.hp, width - 100, 50);
   }
   text(Math.round(frameRate()) + " fps", 50, 575);
+
   text(
-    JSON.stringify({
-      x: Math.round(cameraPos.x),
-      y: Math.round(cameraPos.y)
-    }),
+    "Camera: " +
+      JSON.stringify({
+        x: Math.round(cameraPos.x),
+        y: Math.round(cameraPos.y)
+      }),
     50,
     600
   );
@@ -816,7 +832,10 @@ function toggleShowDebug() {
   showDebug = !showDebug;
 }
 function playEnv() {
-  shootOsc.freq(random([440, 770, 990, 880]));
+  if (!shouldPlaySound) {
+    return;
+  }
+  shootOsc.freq(random([110, 220, 330, 260]));
 
   shootEnv.play();
 }
