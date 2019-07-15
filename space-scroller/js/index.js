@@ -348,14 +348,7 @@ function drawVehicle(p) {
   pop();
 }
 function getColorForShipHP(hp) {
-  if (hp > 66) {
-    return "green";
-  }
-  if (hp > 33) {
-    return "yellow";
-  }
-
-  return "red";
+  return lerpColor(color("red"), color("green"), (max(hp, 20) - 20) / 100);
 }
 
 function drawTrail(trail) {
