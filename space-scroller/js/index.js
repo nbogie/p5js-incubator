@@ -27,6 +27,30 @@ let cameraPos;
 let cameraMoveSpeed = 5;
 const maxScreenShakeAmount = 10;
 
+const events = [
+  { id: "ship1Dead" },
+  { id: "ship2Dead" },
+  { id: "ship3Dead" },
+  { id: "ship4Dead" },
+  { id: "ship5Dead" },
+  { id: "ship6Dead" },
+  { id: "gameStart" },
+  { id: "levelStart" },
+  { id: "nukeLaunched" },
+  { id: "ship1Collision" },
+  { id: "ship2Collision" },
+  { id: "ship3Collision" },
+  { id: "ship4Collision" },
+  { id: "ship5Collision" },
+  { id: "ship6Collision" },
+  { id: "ship1ShieldsLow" },
+  { id: "ship2ShieldsLow" },
+  { id: "ship3ShieldsLow" },
+  { id: "ship4ShieldsLow" },
+  { id: "ship5ShieldsLow" },
+  { id: "ship6ShieldsLow" }
+];
+
 let screenShakeAmount = 0;
 const FaveColors = {
   paletteStrs: [
