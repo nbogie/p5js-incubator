@@ -190,10 +190,25 @@ function drawSteppedHexagons() {
     drawHexagon((ix / lim) * THING_RADIUS, false);
   });
 }
+function drawSpiral() {
+  const radius = THING_RADIUS;
+
+  strokeWeight(1);
+  stroke(randomColor());
+  push();
+
+  for (let r = radius; r > 1; r--) {
+    line(0, r, 20, r);
+    rotate(0.3);
+  }
+  pop();
+}
+
 function drawOuterHexagon() {
   const radius = THING_RADIUS;
   drawHexagon(radius, random([false, false, false, true]));
 }
+
 function drawHexagon(radius, filled = false) {
   const sliceAngle = TWO_PI / 6;
   const startAngle = filled ? PI / 6 : 0;
@@ -250,6 +265,7 @@ function draw() {
   background("whitesmoke");
   const numRows = height / (6 * THING_RADIUS + 2);
   const numCols = width / (6 * THING_RADIUS + 2);
+
   drawGridOfThings(numRows * 2, numCols * 2, drawThing);
   if (showDebug) {
     textSize(24);
@@ -298,7 +314,7 @@ function drawThing() {
     //    x => repeat(random(1, 2), drawSquare),
     random([drawSquarePetals, drawCirclePetals, drawTrianglePetals]),
     drawOuterHexagon,
-
+    //drawSpiral,
     random([drawSteppedHexagons, drawConcentricCircles]),
     drawRadialLines
   ]);
