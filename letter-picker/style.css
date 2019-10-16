@@ -1,0 +1,16 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-size: xx-large;
+  font-family: sans-serif;
+}
+
+#mytext {
+  margin: 200px;
+}
+canvas {
+  position: absolute;
+  top: 100;
+  left: 0;
+}
