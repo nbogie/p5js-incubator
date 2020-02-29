@@ -64,6 +64,12 @@ function randomColor() {
   colorMode(HSB, 360, 100, 100);
   return color(random(360), 60, 60);
 }
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  restart();
+}
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   background(100);
