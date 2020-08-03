@@ -1,3 +1,9 @@
+//lots of inspiration from Matthew Epler's Youtube Series
+// Designing Generative Systems with P5.js
+// https://www.youtube.com/watch?v=rTqvf0BkTNE&list=PLyRZnpOSgMj3K8AV2I6UldnvTj6d_Zrf0
+
+/*jslint browser: true */
+/*global color, circle,square,key,random, createVector,createCanvas, windowWidth, windowHeight, rectMode, CENTER, noStroke, fill, push, pop, rotate, translate, background, lerpColor, rect, ellipse, mouseX, mouseY */
 "use strict";
 const seedHistory = [];
 let showDebug = false;
@@ -43,7 +49,7 @@ const FaveColors = {
   },
   randomMonoPalette: function() {
     const pal = Object.assign({}, FaveColors.randomPalette());
-    pal.colors = _.sample(pal.colors, 2);
+    pal.colors = sampleSize(pal.colors, 2);
     return pal;
   }
 };
@@ -197,9 +203,17 @@ function drawSpiral() {
   stroke(randomColor());
   push();
 
+  const rotAmt = random(0.18, 0.5) * random([1, -1]);
+
+  const fragmentFn = random([
+    r => line(0, r, 20, r),
+    r => circle(0, r, map(r, 1, radius, 1, 10)),
+    r => square(0, r, map(r, 1, radius, 1, 10))
+  ]);
+
   for (let r = radius; r > 1; r--) {
-    line(0, r, 20, r);
-    rotate(0.3);
+    fragmentFn(r);
+    rotate(rotAmt);
   }
   pop();
 }
@@ -297,7 +311,7 @@ function randInt(min, max) {
 }
 
 function atLeastTwoOf(fns) {
-  const pickedFns = _.sample(fns, randInt(2, fns.length));
+  const pickedFns = sampleSize(fns, randInt(2, fns.length));
   pickedFns.forEach(f => f());
 }
 
@@ -311,7 +325,7 @@ function drawGuideLines() {
 function drawThing() {
   // drawGuideLines();
   atLeastTwoOf([
-    //    x => repeat(random(1, 2), drawSquare),
+    //x => repeat(random(1, 2), drawSquare),
     random([drawSquarePetals, drawCirclePetals, drawTrianglePetals]),
     drawOuterHexagon,
     //drawSpiral,
@@ -337,7 +351,7 @@ function drawBlockTattoo() {
   translate(0, -sz);
   noStroke();
   repeat(6, (ix, lim) => {
-    const xs = _.sample([-2, -1, 0, 1, 2], 2);
+    const xs = sampleSize([-2, -1, 0, 1, 2], 2);
     const lineData = makeLineData();
     lineData.forEach((mark, jx) => {
       push();
@@ -353,4 +367,8 @@ function drawBlockTattoo() {
 THING_RADIUS;
 function toggleShowDebug() {
   showDebug = !showDebug;
+}
+
+function sampleSize(arr, num){
+  return shuffle(arr).slice(num);
 }
